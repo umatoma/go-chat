@@ -8,6 +8,8 @@ import (
 	"sync"
 	"flag"
 	"os"
+	"encoding/base64"
+	"encoding/json"
 	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -48,7 +50,17 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)  {
 		filenames := filepath.Join("templates", t.filename)
 		t.templ = template.Must(template.ParseFiles(filenames))
 	})
-	t.templ.Execute(w, r)
+	data := map[string]interface{}{
+		"Host": r.Host,
+	}
+	if authCookie, err := r.Cookie("auth"); err == nil {
+		if decoded, err := base64.StdEncoding.DecodeString(authCookie.Value); err == nil {
+			var userData map[string]interface{}
+			json.Unmarshal(decoded, &userData)
+			data["UserData"] = userData
+		}
+	}
+	t.templ.Execute(w, data)
 }
 
 func main()  {

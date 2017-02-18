@@ -1,5 +1,5 @@
-hash: 26852a7503a3b2dd023ca6879e4fc8721452ae07c7357181e943abdb3fb835d7
-updated: 2017-02-18T12:18:54.243525553+09:00
+hash: e2518afa1cf53ac367700e061de1c36cc227d796efe2b6afd528873d22cf5b3a
+updated: 2017-02-18T13:49:24.004444445+09:00
 imports:
 - name: cloud.google.com/go
   version: 65216237311a9cfc641e2ec8188df94c0e05ddf4
@@ -16,6 +16,8 @@ imports:
   version: 3ab3a8b8831546bd18fd182c20687ca853b2bb13
 - name: github.com/joho/godotenv
   version: 726cc8b906e3d31c70a9671c90a13716a8d3f50d
+- name: github.com/stretchr/objx
+  version: 1a9d0bb9f541897e62256577b352fdbc1fb4fd94
 - name: golang.org/x/net
   version: b4690f45fa1cafc47b1c280c2e75116efe40cc13
   subpackages:

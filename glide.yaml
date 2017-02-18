@@ -5,3 +5,4 @@ import:
 - package: golang.org/x/oauth2
 - package: github.com/joho/godotenv
   version: ^1.1.0
+- package: github.com/stretchr/objx

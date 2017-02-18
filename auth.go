@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 	"io/ioutil"
-	"encoding/base64"
 	"golang.org/x/oauth2"
+	"github.com/stretchr/objx"
 )
 
 type authHandler struct {
@@ -67,9 +67,10 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("Content: %s\n", contents)
+	authCookieValue := objx.MustFromJSON(string(contents)).MustBase64()
 	http.SetCookie(w, &http.Cookie{
 		Name: "auth",
-		Value: base64.StdEncoding.EncodeToString(contents),
+		Value: authCookieValue,
 		Path: "/",
 	})
 	http.Redirect(w, r, "/chat", http.StatusTemporaryRedirect)
