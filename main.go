@@ -67,7 +67,7 @@ func main()  {
 	var addr = flag.String("addr", ":8080", "アプリケーションのアドレス")
 	flag.Parse()
 
-	r := newRoom()
+	r := newRoom(UseGravatar)
 	r.tracer = trace.New(os.Stdout)
 
 	http.Handle("/chat", MustAuth(&templateHandler{ filename: "chat.html" }))

@@ -4,6 +4,10 @@ import (
 	"log"
 	"net/http"
 	"io/ioutil"
+	"crypto/md5"
+	"strings"
+	"fmt"
+	"io"
 	"golang.org/x/oauth2"
 	"github.com/stretchr/objx"
 )
@@ -68,9 +72,14 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Content: %s\n", contents)
 	user := objx.MustFromJSON(string(contents))
+	m := md5.New()
+	io.WriteString(m, strings.ToLower(user.Get("email").Str()))
+	userID := fmt.Sprintf("%x", m.Sum(nil))
 	authCookieValue := objx.New(map[string]interface{}{
+		"userid": userID,
 		"name": user.Get("name").Str(),
 		"avatar_url": user.Get("picture").Str(),
+		"email": user.Get("email").Str(),
 	}).MustBase64()
 	http.SetCookie(w, &http.Cookie{
 		Name: "auth",
