@@ -67,7 +67,11 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("Content: %s\n", contents)
-	authCookieValue := objx.MustFromJSON(string(contents)).MustBase64()
+	user := objx.MustFromJSON(string(contents))
+	authCookieValue := objx.New(map[string]interface{}{
+		"name": user.Get("name").Str(),
+		"avatar_url": user.Get("picture").Str(),
+	}).MustBase64()
 	http.SetCookie(w, &http.Cookie{
 		Name: "auth",
 		Value: authCookieValue,

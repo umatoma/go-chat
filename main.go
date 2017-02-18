@@ -72,6 +72,15 @@ func main()  {
 
 	http.Handle("/chat", MustAuth(&templateHandler{ filename: "chat.html" }))
 	http.Handle("/login", &templateHandler{filename: "login.html"})
+	http.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
+		http.SetCookie(w, &http.Cookie{
+			Name: "auth",
+			Value: "",
+			Path: "/",
+			MaxAge: -1,
+		})
+		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+	})
 	http.HandleFunc("/auth/login/google", loginHandler)
 	http.HandleFunc("/auth/callback/google", callbackHandler)
 	http.Handle("/room", r)
