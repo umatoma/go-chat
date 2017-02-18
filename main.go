@@ -63,6 +63,16 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)  {
 	t.templ.Execute(w, data)
 }
 
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name: "auth",
+		Value: "",
+		Path: "/",
+		MaxAge: -1,
+	})
+	http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+}
+
 func main()  {
 	var addr = flag.String("addr", ":8080", "アプリケーションのアドレス")
 	flag.Parse()
@@ -70,19 +80,13 @@ func main()  {
 	r := newRoom(UseGravatar)
 	r.tracer = trace.New(os.Stdout)
 
-	http.Handle("/chat", MustAuth(&templateHandler{ filename: "chat.html" }))
+	http.Handle("/chat", MustAuth(&templateHandler{filename: "chat.html"}))
 	http.Handle("/login", &templateHandler{filename: "login.html"})
-	http.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
-		http.SetCookie(w, &http.Cookie{
-			Name: "auth",
-			Value: "",
-			Path: "/",
-			MaxAge: -1,
-		})
-		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
-	})
+	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/auth/login/google", loginHandler)
 	http.HandleFunc("/auth/callback/google", callbackHandler)
+	http.Handle("/upload", &templateHandler{filename: "upload.html"})
+	http.HandleFunc("/uploader", uploaderHandler)
 	http.Handle("/room", r)
 
 	go r.run()

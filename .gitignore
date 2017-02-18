@@ -19,6 +19,7 @@
 vendor/
 
 .env
+avatars/
 
 ### macOS ###
 *.DS_Store
