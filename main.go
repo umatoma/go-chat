@@ -19,6 +19,11 @@ import (
 var (
 	googleOauthConfig = new(oauth2.Config)
 	oauthStateString = "random"
+	avatars Avatar = TryAvatars{
+		UseFileSystemAvatar,
+		UseAuthAvatar,
+		UseGravatar,
+	}
 )
 
 type templateHandler struct {
@@ -77,7 +82,7 @@ func main()  {
 	var addr = flag.String("addr", ":8080", "アプリケーションのアドレス")
 	flag.Parse()
 
-	r := newRoom(UseGravatar)
+	r := newRoom()
 	r.tracer = trace.New(os.Stdout)
 
 	http.Handle("/chat", MustAuth(&templateHandler{filename: "chat.html"}))
@@ -87,6 +92,7 @@ func main()  {
 	http.HandleFunc("/auth/callback/google", callbackHandler)
 	http.Handle("/upload", &templateHandler{filename: "upload.html"})
 	http.HandleFunc("/uploader", uploaderHandler)
+	http.Handle("/avatars/", http.StripPrefix("/avatars/", http.FileServer(http.Dir("./avatars"))))
 	http.Handle("/room", r)
 
 	go r.run()

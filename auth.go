@@ -12,6 +12,27 @@ import (
 	"github.com/stretchr/objx"
 )
 
+type ChatUser interface {
+	UniqueID() string
+	AvatarURL() string
+}
+
+type chatUser struct {
+	userInfo map[string]string
+	uniqueID string
+}
+
+func (u chatUser) UniqueID() string {
+	return u.uniqueID
+}
+
+func (u chatUser) AvatarURL() string {
+	if url, ok := u.userInfo["avatar_url"]; ok {
+		return url
+	}
+	return ""
+}
+
 type authHandler struct {
 	next http.Handler
 }
@@ -72,14 +93,23 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Content: %s\n", contents)
 	user := objx.MustFromJSON(string(contents))
-	m := md5.New()
-	io.WriteString(m, strings.ToLower(user.Get("email").Str()))
-	userID := fmt.Sprintf("%x", m.Sum(nil))
-	authCookieValue := objx.New(map[string]interface{}{
-		"userid": userID,
+	userInfo := map[string]string{
 		"name": user.Get("name").Str(),
-		"avatar_url": user.Get("picture").Str(),
 		"email": user.Get("email").Str(),
+		"avatar_url": user.Get("picture").Str(),
+	}
+	chatUser := &chatUser{userInfo: userInfo}
+	m := md5.New()
+	io.WriteString(m, strings.ToLower(userInfo["email"]))
+	chatUser.uniqueID = fmt.Sprintf("%x", m.Sum(nil))
+	avatarURL, err := avatars.GetAvatarURL(chatUser)
+	if err != nil {
+		log.Fatalln("GetAvatarURLに失敗しました", "-", err)
+	}
+	authCookieValue := objx.New(map[string]interface{}{
+		"userid": chatUser.uniqueID,
+		"name": userInfo["name"],
+		"avatar_url": avatarURL,
 	}).MustBase64()
 	http.SetCookie(w, &http.Cookie{
 		Name: "auth",
